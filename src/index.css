@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@utility btn {
+  @apply cursor-pointer transition-colors;
+}
+
+@utility btn-primary {
+  @apply btn inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 shadow-sm;
+}
+
+@utility btn-ghost {
+  @apply btn inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-700;
+}
+
+@utility btn-icon {
+  @apply btn p-2 rounded-lg;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  height: calc(100% - 4px);
+  width: 22px;
+  cursor: pointer;
+  margin: 2px 2px 2px 0;
+  border-radius: 0 7px 7px 0;
+  background: #f1f5f9;
+  border-left: 1px solid #e2e8f0;
+  transition: background 0.15s;
+}
+input[type="number"]::-webkit-inner-spin-button:hover,
+input[type="number"]::-webkit-outer-spin-button:hover {
+  background: #e2e8f0;
+}
+
+.dark input[type="number"]::-webkit-inner-spin-button,
+.dark input[type="number"]::-webkit-outer-spin-button {
+  background: #374151;
+  border-left-color: #4b5563;
+}
+.dark input[type="number"]::-webkit-inner-spin-button:hover,
+.dark input[type="number"]::-webkit-outer-spin-button:hover {
+  background: #4b5563;
+}
