@@ -10,5 +10,7 @@ export const formatShortDate = (date = new Date()) =>
 export const formatTime = (date = new Date()) =>
   new Intl.DateTimeFormat("en-US", { timeStyle: "short" }).format(date)
 
-export const generateReceiptNo = (prefix = "RCP") =>
+const RECEIPT_PREFIX = "RCP"
+
+export const generateReceiptNo = (prefix = RECEIPT_PREFIX) =>
   `${prefix}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`

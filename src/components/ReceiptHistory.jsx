@@ -1,17 +1,13 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useReceipt } from "../context/ReceiptContext"
+import { useReceipt } from "../hooks/useReceipt"
 import { formatShortDate, formatTime } from "../utils/formatting"
-import { HistoryListSkeleton } from "./LoadingSkeleton"
 
 const ReceiptHistory = () => {
   const navigate = useNavigate()
   const { receipts, removeFromHistory, clearHistory, setCurrentReceipt } = useReceipt()
   const [showClear, setShowClear] = useState(false)
-  const [loading] = useState(false)
   const [confirmId, setConfirmId] = useState(null)
-
-  if (loading) return <HistoryListSkeleton />
 
   if (receipts.length === 0) {
     return (

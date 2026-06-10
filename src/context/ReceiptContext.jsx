@@ -1,5 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useCallback, useMemo } from "react"
+import { createContext, useCallback, useMemo } from "react"
 import { useLocalStorage } from "../hooks/useLocalStorage"
 import { generateReceiptNo, formatDate } from "../utils/formatting"
 import { calcSubtotal, calcTax, calcTotal } from "../utils/calculations"
@@ -17,9 +16,10 @@ const defaultSettings = {
   receiptPrefix: "RCP",
   taxId: "",
   logo: "",
+  template: "modern",
 }
 
-const ReceiptContext = createContext(null)
+export const ReceiptContext = createContext(null)
 
 export const ReceiptProvider = ({ children }) => {
   const [settings, setSettings, resetSettings] = useLocalStorage(SETTINGS_KEY, defaultSettings)
@@ -75,10 +75,4 @@ export const ReceiptProvider = ({ children }) => {
       {children}
     </ReceiptContext.Provider>
   )
-}
-
-export const useReceipt = () => {
-  const ctx = useContext(ReceiptContext)
-  if (!ctx) throw new Error("useReceipt must be used within ReceiptProvider")
-  return ctx
 }

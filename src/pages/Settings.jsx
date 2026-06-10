@@ -1,6 +1,8 @@
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { useReceipt } from "../context/ReceiptContext"
+import { useReceipt } from "../hooks/useReceipt"
+import { CURRENCIES } from "../utils/constants"
+import { TEMPLATE_LIST } from "../templates"
 
 const Settings = () => {
   const navigate = useNavigate()
@@ -11,7 +13,8 @@ const Settings = () => {
   const logoInputRef = useRef(null)
 
   const update = (field) => (e) => {
-    const value = field === "taxRate" ? Number(e.target.value) : e.target.value
+    const raw = e.target.value
+    const value = field === "taxRate" ? (raw === "" ? "" : Number(raw)) : raw
     setSettings((prev) => ({ ...prev, [field]: value }))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -277,7 +280,7 @@ const Settings = () => {
                     onChange={update("currency")}
                     className={inputClass}
                   >
-                    {["USD", "EUR", "GBP", "INR", "CAD", "AUD", "JPY", "CNY"].map((c) => (
+                    {CURRENCIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
@@ -297,6 +300,65 @@ const Settings = () => {
                   Receipts will be numbered like {settings.receiptPrefix || "RCP"}-XXXXXXXX
                 </p>
               </div>
+            </div>
+          </section>
+
+          <section className={cardClass}>
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-gray-700">
+              <div className="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-900/50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zm12 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">Invoice Template</h2>
+            </div>
+
+            <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">
+              Choose your preferred receipt layout. The selected template will be used for all new receipts.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {TEMPLATE_LIST.map((t) => {
+                const isActive = settings.template === t.id
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      setSettings((prev) => ({ ...prev, template: t.id }))
+                      setSaved(true)
+                      setTimeout(() => setSaved(false), 2000)
+                    }}
+                    className={`relative flex flex-col items-start gap-2 p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                      isActive
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-sm"
+                        : "border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-slate-300 dark:hover:border-gray-500"
+                    }`}
+                  >
+                    {isActive && (
+                      <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    )}
+                    <div className={`w-full h-20 rounded-lg border flex items-center justify-center ${
+                      isActive ? "border-emerald-300 bg-white" : "border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-700"
+                    }`}>
+                      <svg className={`w-8 h-8 ${isActive ? "text-emerald-500" : "text-slate-300 dark:text-gray-500"}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H6v-2h6v2zm6-4H6v-2h12v2zm0-4H6V7h12v2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-sm font-semibold ${isActive ? "text-emerald-800 dark:text-emerald-300" : "text-slate-700 dark:text-gray-300"}`}>
+                        {t.name}
+                      </p>
+                      <p className={`text-xs mt-0.5 ${isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-gray-500"}`}>
+                        {t.description}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </section>
 

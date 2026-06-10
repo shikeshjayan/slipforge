@@ -2,10 +2,10 @@ import { useNavigate } from "react-router-dom"
 import { useRef, useState, useMemo } from "react"
 import { toCanvas } from "html-to-image"
 import { jsPDF } from "jspdf"
-import { useReceipt } from "../context/ReceiptContext"
+import { useReceipt } from "../hooks/useReceipt"
 import { calcSubtotal, calcTax, calcTotal } from "../utils/calculations"
 import { formatCurrency } from "../utils/formatting"
-import ModernReceipt from "../templates/ModernReceipt"
+import { TEMPLATES } from "../templates"
 import { ReceiptSkeleton } from "../components/LoadingSkeleton"
 
 const defaultForm = { businessName: "", clientName: "", clientWhatsapp: "", clientEmail: "", taxRate: 0, currency: "USD" }
@@ -30,10 +30,14 @@ const Preview = () => {
   }, [items, form.taxRate])
 
   const generatePDFBlob = async () => {
-    const canvas = await toCanvas(printRef.current, {
-      pixelRatio: 3,
+    const el = printRef.current
+    const origWidth = el.style.width
+    el.style.width = "794px"
+    const canvas = await toCanvas(el, {
+      pixelRatio: 2,
       backgroundColor: "#ffffff",
     })
+    el.style.width = origWidth
     const imgData = canvas.toDataURL("image/png")
     const pdf = new jsPDF("p", "mm", "a4")
     const pageW = pdf.internal.pageSize.getWidth()
@@ -76,21 +80,19 @@ const Preview = () => {
       saveToHistory({ form, items, receiptNo, date })
 
       const filename = `${form.businessName || "receipt"}-${receiptNo}.pdf`
-      const file = new File([blob], filename, { type: "application/pdf" })
-      const shareText = `Receipt ${receiptNo} from ${form.businessName || "Business"} · Total: ${formatCurrency(total, form.currency)}`
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: shareText, text: shareText })
-      } else {
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = filename
-        a.click()
-        URL.revokeObjectURL(url)
-        const msg = encodeURIComponent(`${shareText}\n\nPDF downloaded. Attach it to this chat.`)
-        window.open(`https://wa.me/?text=${msg}`, "_blank")
-      }
+      const shareText = `Receipt ${receiptNo} from ${form.businessName || "Business"} · Total: ${formatCurrency(total, form.currency)}`
+      const msg = encodeURIComponent(`${shareText}\n\nPDF downloaded. Attach it to this chat.`)
+
+      const num = form.clientWhatsapp?.replace(/[\s\-\+\(\)]/g, "")
+      const waUrl = num ? `https://wa.me/${num}?text=${msg}` : `https://wa.me/?text=${msg}`
+      window.open(waUrl, "_blank")
     } catch (err) {
       if (err.name !== "AbortError") {
         setPdfError(err.message || "Failed to share receipt")
@@ -163,7 +165,10 @@ const Preview = () => {
           {items.length === 0 ? (
             <ReceiptSkeleton />
           ) : (
-            <ModernReceipt form={form} items={items} receiptNo={receiptNo} date={date} logo={settings.logo} />
+            (() => {
+              const Template = TEMPLATES[settings.template]?.component || TEMPLATES.modern.component
+              return <Template form={form} items={items} receiptNo={receiptNo} date={date} logo={settings.logo} />
+            })()
           )}
         </div>
       </div>
